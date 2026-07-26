@@ -7,7 +7,8 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "computer-usage-summary" / "scripts" / "activitywatch_summary.py"
+SKILL_ROOT = ROOT / "plugins" / "computer-usage-summary-skill" / "skills" / "computer-usage-summary"
+SCRIPT = SKILL_ROOT / "scripts" / "activitywatch_summary.py"
 SPEC = importlib.util.spec_from_file_location("activitywatch_summary", SCRIPT)
 summary_script = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(summary_script)
@@ -100,7 +101,7 @@ class ActivityWatchSummaryTests(unittest.TestCase):
         self.assertIn("| status | reason | source |", summary_script.render_table(unavailable, "markdown", "apps"))
 
     def test_skill_frontmatter_is_present(self):
-        skill = (ROOT / "skills" / "computer-usage-summary" / "SKILL.md").read_text(encoding="utf-8")
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         self.assertTrue(skill.startswith("---\nname: computer-usage-summary\n"))
         self.assertIn("description:", skill.split("---", 2)[1])
 

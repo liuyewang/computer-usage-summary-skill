@@ -28,14 +28,15 @@ repository never downloads, installs, or starts ActivityWatch automatically.
 ## Install In Codex
 
 Install the repository as a skill-only Codex plugin, or install the
-`skills/computer-usage-summary` directory directly with Codex's skill installer.
+`plugins/computer-usage-summary-skill/skills/computer-usage-summary` directory
+directly with Codex's skill installer.
 For a local clone, the skill directory can also be copied into
 `~/.codex/skills/computer-usage-summary/`.
 
 After this repository is published, a GitHub-directory install looks like:
 
 ```text
-$skill-installer install https://github.com/liuyewang/computer-usage-summary-skill/tree/main/skills/computer-usage-summary
+$skill-installer install https://github.com/liuyewang/computer-usage-summary-skill/tree/main/plugins/computer-usage-summary-skill/skills/computer-usage-summary
 ```
 
 ## Usage
@@ -46,19 +47,19 @@ Or run the bundled script directly:
 
 ```bash
 # Default JSON report for an agent or another program
-python3 skills/computer-usage-summary/scripts/activitywatch_summary.py --date today
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today
 
 # Paste an application table into Excel, Numbers, or Feishu Sheets
-python3 skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format tsv --table apps
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format tsv --table apps
 
 # A readable timeline in Markdown
-python3 skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format markdown --table timeline
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format markdown --table timeline
 
 # Keep timeline titles out of the output
-python3 skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format tsv --table timeline --hide-titles
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format tsv --table timeline --hide-titles
 
 # An Excel-friendly CSV file with a UTF-8 BOM
-python3 skills/computer-usage-summary/scripts/activitywatch_summary.py --start 2026-07-20 --end 2026-07-26 --format csv --table apps --csv-bom --output weekly-apps.csv
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --start 2026-07-20 --end 2026-07-26 --format csv --table apps --csv-bom --output weekly-apps.csv
 ```
 
 Tables are available as `summary`, `apps`, and `timeline`. User-facing times

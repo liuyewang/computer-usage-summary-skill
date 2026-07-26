@@ -1,0 +1,80 @@
+---
+name: computer-usage-summary
+description: Summarize what a user did on macOS using local ActivityWatch records, with privacy-preserving live-state and Screen Time fallbacks when records are unavailable. Use for daily activity summaries, app usage time, foreground sessions, AFK time, timelines, and paste-ready spreadsheet tables.
+---
+
+# Computer Usage Summary
+
+## Overview
+
+Use local ActivityWatch data first. The intended privacy-balanced setup records
+only foreground apps, sanitized window titles, and AFK state. Do not install
+browser extensions, enable `aw-sync`, configure cloud storage, or expose the
+local API.
+
+Accurate historical app time and AFK time exist only from the time
+ActivityWatch starts recording. Do not infer them from process uptime, macOS
+system logs, browser history, or undocumented databases.
+
+## Setup And Verification
+
+Use this section only when ActivityWatch is missing, stopped, or needs repair.
+
+1. Inspect `/Applications/ActivityWatch.app`, the current user's Login Items,
+   local ActivityWatch processes, and `~/Library/Application Support/activitywatch/`.
+   Do not replace a working installation.
+2. Let the user choose an official installation source. Before launching it or
+   adding a Login Item, verify `codesign --verify --deep --strict` and assess
+   it with `spctl --assess --type execute`. Stop if signing fails or Gatekeeper
+   rejects the build unless the user explicitly decides otherwise.
+3. Enable only the window and AFK watchers. Let macOS request Accessibility
+   permission through its normal interface; never bypass or change privacy
+   permissions programmatically.
+4. Confirm the local `http://127.0.0.1:5600` server has `currentwindow` and
+   `afkstatus` buckets containing events. The default AFK threshold is 180
+   seconds.
+
+## No-ActivityWatch Fallback
+
+When the app, local API, buckets, or requested-range events are unavailable:
+
+- Mark active time, AFK time, sessions, and launch counts as `unavailable`,
+  not zero.
+- A current frontmost-app or running-app snapshot is only evidence of the
+  present, not the requested range.
+- Use Screen Time only when the user makes its visible totals available; label
+  it `Screen Time reported` and do not read private databases.
+- Inspect browser history only for an explicit website-level request. Inspect
+  recent documents or terminal history only after explicit, source-specific
+  permission. Treat all such results as metadata clues, not durations.
+
+## Workflow
+
+1. Establish the local date range and time zone.
+2. Run `scripts/activitywatch_summary.py --date today`, or use inclusive
+   `--start YYYY-MM-DD --end YYYY-MM-DD` dates. Add `--timezone Area/City` for
+   reproducible local timestamps.
+3. Use `active_seconds` and `afk_seconds` only when ActivityWatch confirms
+   them. Describe `foreground_sessions` as observed foreground intervals, not
+   process launches.
+4. Use sanitized app names and window titles to reconstruct the timeline. A
+   title is `confirmed` only when it directly supports the described activity.
+5. For spreadsheet output, run one table per command:
+   - `--format markdown --table apps` for chat.
+   - `--format tsv --table apps` to copy directly into spreadsheet software.
+   - `--format tsv --table timeline` for chronological rows.
+   - `--format csv --table apps --csv-bom --output report.csv` for an
+     Excel-friendly file, only when the user asks to save one.
+6. When ActivityWatch is unavailable, return its structured reason. Markdown,
+   TSV, and CSV outputs provide `status`, `reason`, and `source` columns.
+
+## Privacy Rules
+
+- Treat window titles as sensitive. Remove URLs, truncate long titles, and
+  never include complete browser URLs.
+- Use the smallest useful amount of title context; application and summary
+  tables do not need titles.
+- Escape spreadsheet cells that could be interpreted as formulas.
+- Keep reports local to the current conversation. Do not export, upload, or
+  share activity data without explicit user approval.
+

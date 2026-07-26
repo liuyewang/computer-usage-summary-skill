@@ -1,0 +1,5 @@
+interface:
+  display_name: "Computer Usage Summary"
+  short_description: "Summarize local macOS activity privately"
+  default_prompt: "Use $computer-usage-summary to summarize today's local macOS activity and provide a paste-ready app table."
+

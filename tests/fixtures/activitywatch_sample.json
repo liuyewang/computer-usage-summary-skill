@@ -1,0 +1,17 @@
+{
+  "buckets": {
+    "aw-watcher-window_test": {"type": "currentwindow"},
+    "aw-watcher-afk_test": {"type": "afkstatus"}
+  },
+  "window_events": [
+    {"timestamp": "2026-01-01T16:00:00+00:00", "duration": 60, "data": {"app": "=Spreadsheet", "title": "https://private.example.com/report"}},
+    {"timestamp": "2026-01-01T16:01:00+00:00", "duration": 180, "data": {"app": "=Spreadsheet", "title": "Project|Plan"}},
+    {"timestamp": "2026-01-01T16:12:00+00:00", "duration": 300, "data": {"app": "Chat", "title": "A very long title that is safe but intentionally padded to verify truncation works consistently across outputs and does not expose more context than the configured maximum title length allows anyone to read"}}
+  ],
+  "afk_events": [
+    {"timestamp": "2026-01-01T16:00:00+00:00", "duration": 600, "data": {"status": "not-afk"}},
+    {"timestamp": "2026-01-01T16:10:00+00:00", "duration": 120, "data": {"status": "afk"}},
+    {"timestamp": "2026-01-01T16:12:00+00:00", "duration": 300, "data": {"status": "not-afk"}}
+  ]
+}
+

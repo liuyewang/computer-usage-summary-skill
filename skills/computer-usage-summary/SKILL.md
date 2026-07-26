@@ -1,13 +1,15 @@
 ---
 name: computer-usage-summary
-description: Summarize what a user did on macOS using local ActivityWatch records, with privacy-preserving live-state and Screen Time fallbacks when records are unavailable. Use for daily activity summaries, app usage time, foreground sessions, AFK time, timelines, and paste-ready spreadsheet tables.
+description: Summarize what a user did on macOS, Windows, or Linux using local ActivityWatch records, with privacy-preserving live-state and Screen Time fallbacks when records are unavailable. Use for daily activity summaries, app usage time, foreground sessions, AFK time, timelines, and paste-ready spreadsheet tables.
 ---
 
 # Computer Usage Summary
 
 ## Overview
 
-Use local ActivityWatch data first. The intended privacy-balanced setup records
+Use local ActivityWatch data first. This skill supports macOS, Windows, and
+Linux wherever the local ActivityWatch API and Python 3.9+ are available. The
+intended privacy-balanced setup records
 only foreground apps, sanitized window titles, and AFK state. Do not install
 browser extensions, enable `aw-sync`, configure cloud storage, or expose the
 local API.
@@ -20,13 +22,14 @@ system logs, browser history, or undocumented databases.
 
 Use this section only when ActivityWatch is missing, stopped, or needs repair.
 
-1. Inspect `/Applications/ActivityWatch.app`, the current user's Login Items,
-   local ActivityWatch processes, and `~/Library/Application Support/activitywatch/`.
-   Do not replace a working installation.
+1. Inspect the local ActivityWatch application, its startup setting, local
+   processes, and the current user's ActivityWatch data directory. Do not
+   replace a working installation.
 2. Let the user choose an official installation source. Before launching it or
-   adding a Login Item, verify `codesign --verify --deep --strict` and assess
-   it with `spctl --assess --type execute`. Stop if signing fails or Gatekeeper
-   rejects the build unless the user explicitly decides otherwise.
+   enabling automatic startup, verify the publisher and operating-system
+   security status. On macOS, use `codesign --verify --deep --strict` and
+   `spctl --assess --type execute`. Stop if validation fails unless the user
+   explicitly decides otherwise.
 3. Enable only the window and AFK watchers. Let macOS request Accessibility
    permission through its normal interface; never bypass or change privacy
    permissions programmatically.
@@ -53,7 +56,7 @@ When the app, local API, buckets, or requested-range events are unavailable:
 1. Establish the local date range and time zone.
 2. Run `scripts/activitywatch_summary.py --date today`, or use inclusive
    `--start YYYY-MM-DD --end YYYY-MM-DD` dates. Add `--timezone Area/City` for
-   reproducible local timestamps.
+   reproducible local timestamps. Keep `--api-url` on the loopback interface.
 3. Use `active_seconds` and `afk_seconds` only when ActivityWatch confirms
    them. Describe `foreground_sessions` as observed foreground intervals, not
    process launches.
@@ -72,9 +75,10 @@ When the app, local API, buckets, or requested-range events are unavailable:
 
 - Treat window titles as sensitive. Remove URLs, truncate long titles, and
   never include complete browser URLs.
+- Keep default sanitized titles for a useful timeline; use `--hide-titles` if
+  the user wants a title-free export.
 - Use the smallest useful amount of title context; application and summary
   tables do not need titles.
 - Escape spreadsheet cells that could be interpreted as formulas.
 - Keep reports local to the current conversation. Do not export, upload, or
   share activity data without explicit user approval.
-

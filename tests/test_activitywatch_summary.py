@@ -61,6 +61,16 @@ class ActivityWatchSummaryTests(unittest.TestCase):
         self.assertFalse(any("private.example.com" in title for title in titles))
         self.assertLessEqual(max(map(len, titles)), summary_script.MAX_TITLE_LENGTH)
 
+    def test_can_hide_timeline_titles(self):
+        result = summary_script.collect_summary(
+            date(2026, 1, 2),
+            date(2026, 1, 2),
+            self.timezone,
+            FixtureFetch(self.payload),
+            include_titles=False,
+        )
+        self.assertEqual({item["title"] for item in result["timeline"]}, {"[Title hidden]"})
+
     def test_spreadsheet_outputs_escape_formulas(self):
         result = self.collect()
         tsv = summary_script.render_table(result, "tsv", "apps")
@@ -97,4 +107,3 @@ class ActivityWatchSummaryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

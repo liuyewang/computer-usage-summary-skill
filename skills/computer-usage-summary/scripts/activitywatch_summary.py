@@ -71,7 +71,7 @@ def safe_cell(value):
     return f"'{text}" if text.startswith(("=", "+", "-", "@")) else text
 
 
-def collect_summary(start_day, end_day, timezone, fetch=get_json):
+def collect_summary(start_day, end_day, timezone, fetch=get_json, include_titles=True):
     start = dt.datetime.combine(start_day, dt.time.min, timezone).astimezone(dt.timezone.utc)
     end = dt.datetime.combine(end_day + dt.timedelta(days=1), dt.time.min, timezone).astimezone(dt.timezone.utc)
     query = urllib.parse.urlencode({"starttime": start.isoformat(), "endtime": end.isoformat()})
@@ -119,7 +119,7 @@ def collect_summary(start_day, end_day, timezone, fetch=get_json):
             "start": event_start.astimezone(timezone).isoformat(),
             "end": event_end.astimezone(timezone).isoformat(),
             "app": app,
-            "title": safe_title(data.get("title", "")),
+            "title": safe_title(data.get("title", "")) if include_titles else "[Title hidden]",
             "active_seconds": round(active, 1),
         })
 
@@ -206,9 +206,11 @@ def main():
     group.add_argument("--start", help="Inclusive local start date in YYYY-MM-DD format")
     parser.add_argument("--end", help="Inclusive local end date; required with --start")
     parser.add_argument("--timezone", help="IANA time zone, for example Asia/Singapore; defaults to the local time zone")
+    parser.add_argument("--api-url", default=DEFAULT_API, help="Local ActivityWatch API URL; defaults to http://127.0.0.1:5600/api/0")
     parser.add_argument("--format", choices=("json", "markdown", "tsv", "csv"), default="json", help="TSV is suitable for pasting into a spreadsheet")
     parser.add_argument("--table", choices=("summary", "apps", "timeline"), default="apps", help="Table for Markdown, TSV, or CSV output")
     parser.add_argument("--csv-bom", action="store_true", help="Prefix CSV output with a UTF-8 BOM for spreadsheet compatibility")
+    parser.add_argument("--hide-titles", action="store_true", help="Replace timeline window titles with [Title hidden]")
     parser.add_argument("--output", help="Optional UTF-8 file path; otherwise write to standard output")
     args = parser.parse_args()
     if args.csv_bom and args.format != "csv":
@@ -227,7 +229,8 @@ def main():
         parser.error("--end must not precede --start")
 
     try:
-        summary = collect_summary(start_day, end_day, timezone)
+        fetch = lambda path: get_json(path, args.api_url)
+        summary = collect_summary(start_day, end_day, timezone, fetch, include_titles=not args.hide_titles)
     except ActivityWatchUnavailable as error:
         summary = {"available": False, "reason": str(error), "timezone": timezone_name(timezone)}
     result = render_table(summary, args.format, args.table, args.csv_bom)
@@ -241,4 +244,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

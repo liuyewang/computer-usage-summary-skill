@@ -6,7 +6,7 @@
 
 **See where your time went, without sending it anywhere.**
 
-A privacy-first [Codex Agent Skill](https://github.com/openai/skills) that
+A privacy-first [Codex skill-only plugin](https://developers.openai.com/codex/plugins/build) that
 turns local [ActivityWatch](https://activitywatch.net/) data into clear app
 usage summaries, AFK time, and sanitized activity timelines. It runs on macOS,
 Windows, and Linux wherever ActivityWatch and Python are available.
@@ -27,9 +27,10 @@ repository never downloads, installs, or starts ActivityWatch automatically.
 
 ## Install In Codex
 
-Install the `skills/computer-usage-summary` directory from this repository
-using Codex's skill installer, then restart Codex. For a local clone, copy that
-directory into `~/.codex/skills/computer-usage-summary/`.
+Install the repository as a skill-only Codex plugin, or install the
+`skills/computer-usage-summary` directory directly with Codex's skill installer.
+For a local clone, the skill directory can also be copied into
+`~/.codex/skills/computer-usage-summary/`.
 
 After this repository is published, a GitHub-directory install looks like:
 

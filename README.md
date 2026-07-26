@@ -83,7 +83,8 @@ clearly labeled limited-evidence report but will not invent time totals.
 
 See [PRIVACY.md](PRIVACY.md) for the data-handling rules and
 [CONTRIBUTING.md](CONTRIBUTING.md) for development checks. Planned improvements
-are listed in [ROADMAP.md](ROADMAP.md).
+are listed in [ROADMAP.md](ROADMAP.md). Maintainers can reuse the
+[launch kit](PROMOTION.md) for privacy-accurate project announcements.
 
 ## License
 

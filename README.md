@@ -24,7 +24,7 @@ On Windows, install the small IANA time-zone data dependency before using an
 explicit `--timezone Area/City` value:
 
 ```bash
-python -m pip install -r requirements-lock.txt
+python -m pip install -r requirements.txt
 ```
 
 Install ActivityWatch from an official source of your choice. Before enabling

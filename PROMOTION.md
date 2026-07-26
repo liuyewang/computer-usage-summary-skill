@@ -34,4 +34,4 @@ macOS, Windows, and Linux.
 
 Repository: https://github.com/liuyewang/computer-usage-summary-skill
 
-Scanner workflow: https://github.com/liuyewang/computer-usage-summary-skill/actions/runs/30199735823
+Scanner workflow: https://github.com/liuyewang/computer-usage-summary-skill/actions/workflows/hol-plugin-scanner.yml

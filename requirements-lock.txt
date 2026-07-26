@@ -1,2 +1,0 @@
-# Deliberately pinned runtime dependency for reproducible Windows time zones.
-tzdata==2026.3

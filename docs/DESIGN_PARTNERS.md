@@ -21,8 +21,8 @@ ActivityWatch exports, window titles, URLs, account names, or local paths.
 4. Would you pay for advanced local reports? If so, what outcome is worth it?
 5. What privacy boundary must never be crossed?
 
-## Public Validation Metrics
+## Public Validation
 
-We review GitHub stars, forks, installation feedback, discussion participation,
-first-report feedback, and completed interviews. We do not collect activity
+The [validation scorecard](VALIDATION_SCORECARD.md) is the single source of
+truth for public signals and the Pro decision gate. We do not collect activity
 content or add behavioral analytics to the skill or landing page.

@@ -17,6 +17,7 @@
     "longDescription": "Summarize local application activity, foreground sessions, AFK time, and sanitized timelines without uploading usage data.",
     "developerName": "liuyewang",
     "category": "Productivity",
+    "composerIcon": "./assets/icon.svg",
     "capabilities": ["Local analysis", "Spreadsheet export"],
     "websiteURL": "https://github.com/liuyewang/computer-usage-summary-skill",
     "privacyPolicyURL": "https://github.com/liuyewang/computer-usage-summary-skill/blob/main/PRIVACY.md",

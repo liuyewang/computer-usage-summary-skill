@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "category": "Admin",
+    "billable": false
+  },
+  "rules": [
+    {
+      "app": "=Spreadsheet",
+      "project": "Quarterly review",
+      "client": "Northwind",
+      "category": "Client work",
+      "billable": true
+    },
+    {
+      "title_pattern": "URL omitted",
+      "project": "Sensitive source",
+      "client": "Northwind",
+      "category": "Research",
+      "billable": true
+    },
+    {
+      "app_pattern": "Chat",
+      "project": "Internal coordination",
+      "category": "Communication"
+    }
+  ]
+}

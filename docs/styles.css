@@ -1,0 +1,42 @@
+:root {
+  --ink: #17231f;
+  --paper: #f6f0e5;
+  --forest: #0f5a4b;
+  --mint: #d9f2e8;
+  --sun: #f3b63d;
+  --line: #b9c7bc;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--ink); background: var(--paper); font: 17px/1.55 Georgia, "Iowan Old Style", serif; }
+main { max-width: 1240px; margin: 0 auto; padding: 0 38px; }
+nav { display: flex; justify-content: space-between; align-items: center; min-height: 88px; border-bottom: 1px solid var(--line); font-family: "Avenir Next", "Gill Sans", sans-serif; }
+.brand { color: var(--ink); font-weight: 800; text-decoration: none; letter-spacing: -.04em; }
+.nav-links { display: flex; gap: 22px; }
+.nav-links a { color: var(--ink); text-decoration: none; font-size: 14px; }
+.hero { display: grid; grid-template-columns: 1.12fr .88fr; gap: 60px; align-items: center; padding: 96px 0 78px; }
+.eyebrow { color: var(--forest); margin: 0 0 14px; font: 800 12px/1 "Avenir Next", "Gill Sans", sans-serif; letter-spacing: .14em; }
+h1, h2, p { margin-top: 0; }
+h1 { max-width: 720px; margin-bottom: 24px; font-size: clamp(48px, 6vw, 86px); line-height: .97; letter-spacing: -.065em; }
+h1 em { color: var(--forest); font-weight: 400; }
+h2 { font-size: clamp(30px, 3.4vw, 50px); line-height: 1; letter-spacing: -.05em; }
+.lede { max-width: 590px; font-size: 22px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.button { display: inline-block; padding: 13px 18px; border: 1px solid var(--forest); border-radius: 2px; font: 700 14px/1 "Avenir Next", "Gill Sans", sans-serif; text-decoration: none; }
+.primary { color: white; background: var(--forest); }
+.secondary { color: var(--forest); }
+.proof { margin-top: 18px; color: #526057; font-size: 14px; }
+.report-card { background: var(--forest); color: #f8f2e7; padding: 28px; box-shadow: 15px 15px 0 var(--sun); transform: rotate(1.4deg); font-family: "Avenir Next", "Gill Sans", sans-serif; }
+.report-topline { display: flex; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid #83b8a7; font-size: 10px; letter-spacing: .12em; }
+.report-title { margin: 26px 0; font: 38px/.98 Georgia, "Iowan Old Style", serif; letter-spacing: -.05em; }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.metrics div { padding: 12px 0; border-top: 1px solid #83b8a7; }
+.metrics b, .metrics span { display: block; }
+.metrics b { font-size: 20px; }.metrics span, .report-card small { color: #bde5d7; font-size: 11px; }
+.bars { margin: 20px 0; }.bars p { display: grid; grid-template-columns: 1.35fr 2fr .7fr; gap: 9px; align-items: center; margin: 11px 0; font-size: 11px; }.bars i { height: 8px; width: var(--w); background: var(--sun); }.bars strong { font-size: 11px; text-align: right; }
+.value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid var(--line); background: var(--line); }.value-grid article { min-height: 300px; padding: 30px; background: var(--paper); }.value-grid span { color: var(--forest); font: 800 12px "Avenir Next", "Gill Sans", sans-serif; }.value-grid h2 { margin-top: 72px; font-size: 30px; }
+.privacy, .partners, .chinese { padding: 110px 9%; }.privacy { background: var(--mint); margin: 95px -38px 0; }.privacy h2 { max-width: 730px; }.privacy-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 45px; }.privacy-points b { display: block; color: var(--forest); font-family: "Avenir Next", "Gill Sans", sans-serif; }
+.partners { max-width: 900px; }.partners > p:not(.eyebrow) { max-width: 660px; font-size: 20px; }.chinese { margin: 0 -38px; color: #f8f2e7; background: var(--ink); }.chinese .eyebrow { color: var(--sun); }.chinese h2 { max-width: 720px; }.chinese p { max-width: 730px; }
+footer { padding: 35px; text-align: center; color: #647168; font: 12px "Avenir Next", "Gill Sans", sans-serif; }
+@media (max-width: 760px) { main { padding: 0 20px; } nav { min-height: 70px; }.nav-links { gap: 12px; }.hero { grid-template-columns: 1fr; gap: 45px; padding: 65px 0; }.report-card { margin: 0 8px; }.value-grid, .privacy-points { grid-template-columns: 1fr; }.privacy, .chinese { margin-left: -20px; margin-right: -20px; padding: 72px 20px; }.partners { padding: 75px 0; }.value-grid article { min-height: 0; }.value-grid h2 { margin-top: 45px; } }

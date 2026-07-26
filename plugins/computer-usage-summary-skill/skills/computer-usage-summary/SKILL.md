@@ -32,10 +32,10 @@ Use this section only when ActivityWatch is missing, stopped, or needs repair.
    explicitly decides otherwise.
 3. Enable only the window and AFK watchers. Let macOS request Accessibility
    permission through its normal interface; never bypass or change privacy
-permissions programmatically.
-5. On Windows, install the bundled `requirements-lock.txt` once so Python can
+   permissions programmatically.
+4. On Windows, install the bundled `requirements-lock.txt` once so Python can
    resolve IANA time zones such as `Asia/Singapore` consistently.
-4. Confirm the local `http://127.0.0.1:5600` server has `currentwindow` and
+5. Confirm the local `http://127.0.0.1:5600` server has `currentwindow` and
    `afkstatus` buckets containing events. The default AFK threshold is 180
    seconds.
 
@@ -56,21 +56,28 @@ When the app, local API, buckets, or requested-range events are unavailable:
 ## Workflow
 
 1. Establish the local date range and time zone.
-2. Run `scripts/activitywatch_summary.py --date today`, or use inclusive
-   `--start YYYY-MM-DD --end YYYY-MM-DD` dates. Add `--timezone Area/City` for
-   reproducible local timestamps. Keep `--api-url` on the loopback interface.
+2. Run `scripts/activitywatch_summary.py --date today`, use `--period week` or
+   `--period month` around an anchor date, or use inclusive `--start YYYY-MM-DD
+   --end YYYY-MM-DD` dates. Add `--timezone Area/City` for reproducible local
+   timestamps. Keep `--api-url` on the loopback interface.
 3. Use `active_seconds` and `afk_seconds` only when ActivityWatch confirms
    them. Describe `foreground_sessions` as observed foreground intervals, not
    process launches.
 4. Use sanitized app names and window titles to reconstruct the timeline. A
    title is `confirmed` only when it directly supports the described activity.
-5. For spreadsheet output, run one table per command:
+5. When the user needs project/client or billable reporting, offer an optional
+   local JSON `--rules` file. Match only sanitized titles. Explain that the
+   first matching rule wins and never create or upload rules without consent.
+6. For spreadsheet output, run one table per command:
    - `--format markdown --table apps` for chat.
    - `--format tsv --table apps` to copy directly into spreadsheet software.
    - `--format tsv --table timeline` for chronological rows.
    - `--format csv --table apps --csv-bom --output report.csv` for an
      Excel-friendly file, only when the user asks to save one.
-6. When ActivityWatch is unavailable, return its structured reason. Markdown,
+   - `--report client-timesheet` for project/client billable rows.
+   - `--report weekly-review` for a compact review table.
+   - `--report app-trend` for local daily trend rows.
+7. When ActivityWatch is unavailable, return its structured reason. Markdown,
    TSV, and CSV outputs provide `status`, `reason`, and `source` columns.
 
 ## Privacy Rules

@@ -7,9 +7,9 @@
 **See where your time went, without sending it anywhere.**
 
 A privacy-first [Codex skill-only plugin](https://developers.openai.com/codex/plugins/build) that
-turns local [ActivityWatch](https://activitywatch.net/) data into clear app
-usage summaries, AFK time, and sanitized activity timelines. It runs on macOS,
-Windows, and Linux wherever ActivityWatch and Python are available.
+turns local [ActivityWatch](https://activitywatch.net/) data into clear app,
+project, category, billable-time, AFK, and sanitized timeline reports. It runs
+on macOS, Windows, and Linux wherever ActivityWatch and Python are available.
 
 中文简介：这是一个基于本机 ActivityWatch 的跨平台电脑使用情况汇总技能。它不会上传
 活动数据，不安装浏览器扩展，也不会展示完整网址。
@@ -59,6 +59,12 @@ python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scrip
 # Paste an application table into Excel, Numbers, or Feishu Sheets
 python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format tsv --table apps
 
+# Review the Monday-Sunday week containing the anchor date
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date 2026-07-26 --period week --format markdown --table trend
+
+# Review the month containing the anchor date
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date 2026-07-26 --period month --format tsv --table categories
+
 # A readable timeline in Markdown
 python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --format markdown --table timeline
 
@@ -67,12 +73,37 @@ python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scrip
 
 # An Excel-friendly CSV file with a UTF-8 BOM
 python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --start 2026-07-20 --end 2026-07-26 --format csv --table apps --csv-bom --output weekly-apps.csv
+
+# Create a client-ready timesheet from local app/title mapping rules
+python3 plugins/computer-usage-summary-skill/skills/computer-usage-summary/scripts/activitywatch_summary.py --date today --period week --rules examples/rules.json --format csv --report client-timesheet --csv-bom --output client-timesheet.csv
 ```
 
-Tables are available as `summary`, `apps`, and `timeline`. User-facing times
-are emitted in the selected local time zone; use `--timezone Asia/Singapore`
-to make a report reproducible across machines. `--api-url` defaults to the
-local ActivityWatch API and should remain on loopback addresses.
+Tables are available as `summary`, `apps`, `projects`, `categories`, `trend`,
+and `timeline`. Report templates are `client-timesheet`, `weekly-review`, and
+`app-trend`. User-facing times are emitted in the selected local time zone; use
+`--timezone Asia/Singapore` to make a report reproducible across machines.
+`--api-url` defaults to the local ActivityWatch API and should remain on
+loopback addresses.
+
+## Local Project Rules
+
+Copy [examples/rules.json](examples/rules.json) and make it yours. Rules match
+application names, application regular expressions, or **already-sanitized**
+window-title patterns. The first matching rule wins. Rules stay on your device
+and are never uploaded.
+
+```json
+{
+  "defaults": {"category": "Admin", "billable": false},
+  "rules": [
+    {"app": "Code", "project": "Website refresh", "client": "Northwind Studio", "category": "Client work", "billable": true}
+  ]
+}
+```
+
+See the [local-first landing page](https://liuyewang.github.io/computer-usage-summary-skill/)
+for a synthetic report preview and the [design-partner guide](docs/DESIGN_PARTNERS.md)
+to help shape future reports without sharing activity data.
 
 ## Limitations
 

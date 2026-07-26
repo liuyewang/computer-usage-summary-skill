@@ -43,17 +43,75 @@ class ActivityWatchSummaryTests(unittest.TestCase):
             FixtureFetch(self.payload),
         )
 
+    def collect_with_rules(self):
+        rules_path = ROOT / "tests" / "fixtures" / "rules_sample.json"
+        return summary_script.collect_summary(
+            date(2026, 1, 2),
+            date(2026, 1, 2),
+            self.timezone,
+            FixtureFetch(self.payload),
+            rules=summary_script.load_rules(rules_path),
+        )
+
     def test_collects_active_time_sessions_and_local_times(self):
         result = self.collect()
         apps = {item["app"]: item for item in result["apps"]}
         self.assertTrue(result["available"])
         self.assertEqual(result["timezone"], "Asia/Singapore")
         self.assertEqual(result["active_seconds"], 540.0)
+        self.assertEqual(result["billable_seconds"], 0.0)
         self.assertEqual(result["afk_seconds"], 120.0)
         self.assertEqual(apps["=Spreadsheet"]["foreground_sessions"], 1)
         self.assertEqual(apps["=Spreadsheet"]["active_seconds"], 240.0)
         self.assertEqual(apps["=Spreadsheet"]["first_seen"], "2026-01-02T00:00:00+08:00")
         self.assertEqual(apps["Chat"]["last_active"], "2026-01-02T00:17:00+08:00")
+
+    def test_rules_map_sanitized_titles_and_billable_projects(self):
+        result = self.collect_with_rules()
+        projects = {item["project"]: item for item in result["projects"]}
+        categories = {item["category"]: item for item in result["categories"]}
+        self.assertEqual(result["billable_seconds"], 240.0)
+        self.assertEqual(projects["Quarterly review"]["client"], "Northwind")
+        self.assertEqual(projects["Quarterly review"]["billable_seconds"], 240.0)
+        self.assertEqual(projects["Internal coordination"]["active_seconds"], 300.0)
+        self.assertEqual(categories["Client work"]["active_seconds"], 240.0)
+        self.assertFalse(any("private.example.com" in item["title"] for item in result["timeline"]))
+
+    def test_first_matching_rule_wins(self):
+        rules = summary_script.load_rules(ROOT / "tests" / "fixtures" / "rules_sample.json")
+        attributes = summary_script.attributes_for("=Spreadsheet", "[URL omitted]", rules)
+        self.assertEqual(attributes["project"], "Quarterly review")
+
+    def test_invalid_rules_are_rejected(self):
+        invalid_path = ROOT / "tests" / "fixtures" / "invalid_rules.json"
+        invalid_path.write_text('{"rules": [{"title_pattern": "["}]}', encoding="utf-8")
+        self.addCleanup(invalid_path.unlink)
+        with self.assertRaises(summary_script.RulesConfigurationError):
+            summary_script.load_rules(invalid_path)
+
+    def test_week_and_month_ranges(self):
+        week_start, week_end = summary_script.parse_date_range("2026-01-02", None, None, "week", self.timezone)
+        month_start, month_end = summary_script.parse_date_range("2026-02-10", None, None, "month", self.timezone)
+        self.assertEqual((week_start, week_end), (date(2025, 12, 29), date(2026, 1, 4)))
+        self.assertEqual((month_start, month_end), (date(2026, 2, 1), date(2026, 2, 28)))
+
+    def test_report_templates_are_paste_ready(self):
+        result = self.collect_with_rules()
+        timesheet = summary_script.render_table(result, "tsv", "client-timesheet")
+        review = summary_script.render_table(result, "markdown", "weekly-review")
+        trend = summary_script.render_table(result, "csv", "app-trend")
+        self.assertIn("Northwind\tQuarterly review", timesheet)
+        self.assertIn("top_project", review)
+        self.assertIn("2026-01-02", trend)
+
+    def test_trend_includes_afk_and_active_time(self):
+        result = self.collect_with_rules()
+        self.assertEqual(result["trend"], [{
+            "date": "2026-01-02",
+            "active_seconds": 540.0,
+            "afk_seconds": 120.0,
+            "billable_seconds": 240.0,
+        }])
 
     def test_sanitizes_urls_and_truncates_titles(self):
         result = self.collect()

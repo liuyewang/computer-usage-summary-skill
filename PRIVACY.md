@@ -16,3 +16,15 @@ system logs.
 The optional `--api-url` is intended for a local loopback ActivityWatch server.
 Do not point it at a public or shared endpoint unless the user explicitly
 understands the data exposure and network-security implications.
+
+## Local Rules And Reports
+
+The optional `--rules` JSON file maps application names and sanitized titles to
+projects, clients, categories, and billable status. It is read from the local
+path supplied by the user and is never sent to this project, GitHub, or a third
+party. Rules are applied only after URL removal and title truncation.
+
+The project landing page has no analytics script, tracking pixel, or email
+form. Design-partner conversations happen through GitHub Discussions and must
+not include raw ActivityWatch exports, titles, URLs, account names, or local
+paths.

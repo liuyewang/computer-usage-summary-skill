@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "project": "Unassigned",
+    "client": "",
+    "category": "Admin",
+    "billable": false
+  },
+  "rules": [
+    {
+      "app": "Code",
+      "project": "Website refresh",
+      "client": "Northwind Studio",
+      "category": "Client work",
+      "billable": true
+    },
+    {
+      "app_pattern": "Slack|Teams",
+      "project": "Internal operations",
+      "category": "Communication"
+    },
+    {
+      "title_pattern": "Quarterly planning",
+      "project": "Q3 planning",
+      "category": "Planning"
+    }
+  ]
+}

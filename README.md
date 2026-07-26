@@ -20,6 +20,13 @@ Windows, and Linux wherever ActivityWatch and Python are available.
 - Python 3.9 or newer
 - ActivityWatch running locally with the window and AFK watchers enabled
 
+On Windows, install the small IANA time-zone data dependency before using an
+explicit `--timezone Area/City` value:
+
+```bash
+python -m pip install -r requirements-lock.txt
+```
+
 Install ActivityWatch from an official source of your choice. Before enabling
 automatic startup, verify its publisher and operating-system security prompt.
 On macOS, verify its code signature and Gatekeeper status. This

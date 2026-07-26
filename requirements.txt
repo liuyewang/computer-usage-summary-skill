@@ -1,0 +1,2 @@
+# Windows needs the IANA database for zoneinfo; harmless on macOS and Linux.
+tzdata==2026.3

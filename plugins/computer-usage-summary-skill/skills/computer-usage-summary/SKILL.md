@@ -32,7 +32,9 @@ Use this section only when ActivityWatch is missing, stopped, or needs repair.
    explicitly decides otherwise.
 3. Enable only the window and AFK watchers. Let macOS request Accessibility
    permission through its normal interface; never bypass or change privacy
-   permissions programmatically.
+permissions programmatically.
+5. On Windows, install the bundled `requirements-lock.txt` once so Python can
+   resolve IANA time zones such as `Asia/Singapore` consistently.
 4. Confirm the local `http://127.0.0.1:5600` server has `currentwindow` and
    `afkstatus` buckets containing events. The default AFK threshold is 180
    seconds.

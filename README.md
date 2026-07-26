@@ -113,8 +113,9 @@ for foreground-app time or application launches. The skill can provide a
 clearly labeled limited-evidence report but will not invent time totals.
 
 See [PRIVACY.md](PRIVACY.md) for the data-handling rules and
-[CONTRIBUTING.md](CONTRIBUTING.md) for development checks. Planned improvements
-are listed in [ROADMAP.md](ROADMAP.md). Maintainers can reuse the
+[CONTRIBUTING.md](CONTRIBUTING.md) for development checks, and
+[SUPPORT.md](SUPPORT.md) for safe support requests. Planned improvements are
+listed in [ROADMAP.md](ROADMAP.md). Maintainers can reuse the
 [launch kit](PROMOTION.md) for privacy-accurate project announcements. Public
 product updates are recorded in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 

@@ -175,6 +175,19 @@ class ActivityWatchSummaryTests(unittest.TestCase):
         self.assertTrue(skill.startswith("---\nname: computer-usage-summary\n"))
         self.assertIn("description:", skill.split("---", 2)[1])
 
+    def test_skill_default_conversational_output_contract(self):
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        headings = [
+            "`Today at a glance`",
+            "`What you did`",
+            "`App table`",
+            "`Caveats`",
+        ]
+        positions = [skill.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("unless the user explicitly asks for a simpler or shorter output", skill)
+        self.assertIn("Do not infer a reduced format merely because the request is short.", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

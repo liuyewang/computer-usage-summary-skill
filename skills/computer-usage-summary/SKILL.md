@@ -80,6 +80,41 @@ When the app, local API, buckets, or requested-range events are unavailable:
 7. When ActivityWatch is unavailable, return its structured reason. Markdown,
    TSV, and CSV outputs provide `status`, `reason`, and `source` columns.
 
+## Default Conversational Output
+
+For conversational summaries, always use the following four sections, in this
+order, unless the user explicitly asks for a simpler or shorter output:
+
+1. `Today at a glance`
+   - State the local date and time zone.
+   - Report confirmed active time, away time, and evidence coverage.
+   - In fallback mode, state that unavailable values are `unavailable`; do not
+     estimate them.
+2. `What you did`
+   - Give a chronological list of meaningful activity windows.
+   - Include the time window, activity, supporting app or sanitized title,
+     confidence, and evidence label (`confirmed ActivityWatch`, `Screen Time
+     reported`, `live snapshot`, or `metadata clue`).
+3. `App table`
+   - Include app name, observed foreground sessions, active time, first seen,
+     last active, and source note when ActivityWatch data is available.
+   - If data is unavailable, keep this section and show the structured reason
+     with `unavailable` metrics rather than omitting the table.
+4. `Caveats`
+   - State the relevant privacy and evidence limits, including that foreground
+     sessions are observed intervals rather than process-launch counts and that
+     tracking starts only when ActivityWatch starts.
+
+Keep these sections even when one contains little or no data. A request such as
+"简单一点", "简要输出", "只要结论", or "只给表格" is an explicit request
+for a reduced format; then omit or compress only the sections the user asks to
+remove. Do not infer a reduced format merely because the request is short.
+
+For a requested export (`TSV`, `CSV`, or a saved report), follow the export
+format the user requested instead of wrapping it in these conversational
+headings. If the user asks for both a summary and an export, provide the four
+conversational sections first and then the requested export.
+
 ## Privacy Rules
 
 - Treat window titles as sensitive. Remove URLs, truncate long titles, and

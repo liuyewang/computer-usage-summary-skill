@@ -4,6 +4,11 @@ This is a privacy-safe product and validation log. It records decisions and
 feedback themes, never ActivityWatch events, window titles, URLs, account
 names, local paths, or behavioral telemetry.
 
+## 2026-07-27 - v0.2.2 Review Fixes
+
+- Convert invalid IANA time-zone input into a clean CLI validation error.
+- Document the direct `tzdata` install command required by the mirrored skill package.
+
 ## 2026-07-26 - v0.2.0 Launch And Validation Setup
 
 ### Shipped

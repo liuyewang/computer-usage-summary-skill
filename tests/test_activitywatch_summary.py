@@ -1,8 +1,12 @@
 import importlib.util
 import json
+import sys
 import unittest
+from contextlib import redirect_stderr
 from datetime import date
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 
@@ -88,6 +92,14 @@ class ActivityWatchSummaryTests(unittest.TestCase):
         self.addCleanup(invalid_path.unlink)
         with self.assertRaises(summary_script.RulesConfigurationError):
             summary_script.load_rules(invalid_path)
+
+    def test_invalid_timezone_is_a_cli_error(self):
+        stderr = StringIO()
+        with patch.object(sys, "argv", ["activitywatch_summary.py", "--timezone", "Not/AZone"]):
+            with redirect_stderr(stderr), self.assertRaises(SystemExit) as raised:
+                summary_script.main()
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("unknown IANA time zone: Not/AZone", stderr.getvalue())
 
     def test_week_and_month_ranges(self):
         week_start, week_end = summary_script.parse_date_range("2026-01-02", None, None, "week", self.timezone)

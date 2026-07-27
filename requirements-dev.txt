@@ -1,0 +1,2 @@
+# Development-only dependency for validating the Codex plugin manifest.
+PyYAML>=6.0,<7

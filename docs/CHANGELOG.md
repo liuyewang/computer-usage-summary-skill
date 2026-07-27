@@ -26,3 +26,12 @@ Which private report is used repeatedly enough to justify a paid local Pro
 trial: client timesheets, personal weekly reviews, or long-term app trends?
 
 See [VALIDATION_SCORECARD.md](VALIDATION_SCORECARD.md) for the evidence gate.
+
+## 2026-07-27 - v0.2.1 Cross-Platform Packaging
+
+### Shipped
+
+- Moved the real skill directory to the repository-root `skills/` layout so
+  Codex and community skill registries can discover the same package.
+- Removed the symlink-based compatibility layer and updated installation,
+  test, CI, and local marketplace paths.

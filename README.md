@@ -1,6 +1,7 @@
 # Computer Usage Summary Skill
 
 [![CI](https://github.com/liuyewang/computer-usage-summary-skill/actions/workflows/test.yml/badge.svg)](https://github.com/liuyewang/computer-usage-summary-skill/actions/workflows/test.yml)
+[![skills.sh](https://skills.sh/b/liuyewang/computer-usage-summary-skill)](https://skills.sh/liuyewang/computer-usage-summary-skill)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f766e.svg)](LICENSE)
 [![Local first](https://img.shields.io/badge/privacy-local--first-0f766e.svg)](PRIVACY.md)
 

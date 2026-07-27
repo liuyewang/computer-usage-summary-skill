@@ -4,6 +4,14 @@ This is a privacy-safe product and validation log. It records decisions and
 feedback themes, never ActivityWatch events, window titles, URLs, account
 names, local paths, or behavioral telemetry.
 
+## 2026-07-27 - v0.2.3 Standardized Conversational Output
+
+- Standardized conversational summaries around `Today at a glance`, `What you
+  did`, `App table`, and `Caveats`.
+- Kept the four-section structure for unavailable ActivityWatch data and made
+  reduced output opt-in when the user explicitly requests it.
+- Added a regression test for the default conversational output contract.
+
 ## 2026-07-27 - v0.2.2 Review Fixes
 
 - Convert invalid IANA time-zone input into a clean CLI validation error.

@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_ROOT = ROOT / "plugins" / "computer-usage-summary-skill" / "skills" / "computer-usage-summary"
+SKILL_ROOT = ROOT / "skills" / "computer-usage-summary"
 SCRIPT = SKILL_ROOT / "scripts" / "activitywatch_summary.py"
 SPEC = importlib.util.spec_from_file_location("activitywatch_summary", SCRIPT)
 summary_script = importlib.util.module_from_spec(SPEC)

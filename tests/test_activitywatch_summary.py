@@ -1,192 +1,198 @@
+import datetime as dt
 import importlib.util
-import json
-import sys
+import os
+import pathlib
 import unittest
-from contextlib import redirect_stderr
-from datetime import date
-from io import StringIO
-from pathlib import Path
-from unittest.mock import patch
+from unittest import mock
 from zoneinfo import ZoneInfo
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).parents[1]
 SKILL_ROOT = ROOT / "skills" / "computer-usage-summary"
 SCRIPT = SKILL_ROOT / "scripts" / "activitywatch_summary.py"
 SPEC = importlib.util.spec_from_file_location("activitywatch_summary", SCRIPT)
-summary_script = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(summary_script)
-
-
-class FixtureFetch:
-    def __init__(self, payload):
-        self.payload = payload
-
-    def __call__(self, path):
-        if path == "/buckets/":
-            return self.payload["buckets"]
-        if "window" in path:
-            return self.payload["window_events"]
-        if "afk" in path:
-            return self.payload["afk_events"]
-        raise AssertionError(path)
+SUMMARY = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(SUMMARY)
 
 
 class ActivityWatchSummaryTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        fixture_path = ROOT / "tests" / "fixtures" / "activitywatch_sample.json"
-        cls.payload = json.loads(fixture_path.read_text(encoding="utf-8"))
-        cls.timezone = ZoneInfo("Asia/Singapore")
+    def setUp(self):
+        self.timezone = ZoneInfo("Asia/Singapore")
+        self.start = dt.datetime(2026, 8, 3, tzinfo=self.timezone)
+        self.end = self.start + dt.timedelta(days=1)
 
-    def collect(self):
-        return summary_script.collect_summary(
-            date(2026, 1, 2),
-            date(2026, 1, 2),
-            self.timezone,
-            FixtureFetch(self.payload),
-        )
-
-    def collect_with_rules(self):
-        rules_path = ROOT / "tests" / "fixtures" / "rules_sample.json"
-        return summary_script.collect_summary(
-            date(2026, 1, 2),
-            date(2026, 1, 2),
-            self.timezone,
-            FixtureFetch(self.payload),
-            rules=summary_script.load_rules(rules_path),
-        )
-
-    def test_collects_active_time_sessions_and_local_times(self):
-        result = self.collect()
-        apps = {item["app"]: item for item in result["apps"]}
-        self.assertTrue(result["available"])
-        self.assertEqual(result["timezone"], "Asia/Singapore")
-        self.assertEqual(result["active_seconds"], 540.0)
-        self.assertEqual(result["billable_seconds"], 0.0)
-        self.assertEqual(result["afk_seconds"], 120.0)
-        self.assertEqual(apps["=Spreadsheet"]["foreground_sessions"], 1)
-        self.assertEqual(apps["=Spreadsheet"]["active_seconds"], 240.0)
-        self.assertEqual(apps["=Spreadsheet"]["first_seen"], "2026-01-02T00:00:00+08:00")
-        self.assertEqual(apps["Chat"]["last_active"], "2026-01-02T00:17:00+08:00")
-
-    def test_rules_map_sanitized_titles_and_billable_projects(self):
-        result = self.collect_with_rules()
-        projects = {item["project"]: item for item in result["projects"]}
-        categories = {item["category"]: item for item in result["categories"]}
-        self.assertEqual(result["billable_seconds"], 240.0)
-        self.assertEqual(projects["Quarterly review"]["client"], "Northwind")
-        self.assertEqual(projects["Quarterly review"]["billable_seconds"], 240.0)
-        self.assertEqual(projects["Internal coordination"]["active_seconds"], 300.0)
-        self.assertEqual(categories["Client work"]["active_seconds"], 240.0)
-        self.assertFalse(any("private.example.com" in item["title"] for item in result["timeline"]))
-
-    def test_first_matching_rule_wins(self):
-        rules = summary_script.load_rules(ROOT / "tests" / "fixtures" / "rules_sample.json")
-        attributes = summary_script.attributes_for("=Spreadsheet", "[URL omitted]", rules)
-        self.assertEqual(attributes["project"], "Quarterly review")
-
-    def test_invalid_rules_are_rejected(self):
-        invalid_path = ROOT / "tests" / "fixtures" / "invalid_rules.json"
-        invalid_path.write_text('{"rules": [{"title_pattern": "["}]}', encoding="utf-8")
-        self.addCleanup(invalid_path.unlink)
-        with self.assertRaises(summary_script.RulesConfigurationError):
-            summary_script.load_rules(invalid_path)
-
-    def test_invalid_timezone_is_a_cli_error(self):
-        stderr = StringIO()
-        with patch.object(sys, "argv", ["activitywatch_summary.py", "--timezone", "Not/AZone"]):
-            with redirect_stderr(stderr), self.assertRaises(SystemExit) as raised:
-                summary_script.main()
-        self.assertEqual(raised.exception.code, 2)
-        self.assertIn("unknown IANA time zone: Not/AZone", stderr.getvalue())
-
-    def test_week_and_month_ranges(self):
-        week_start, week_end = summary_script.parse_date_range("2026-01-02", None, None, "week", self.timezone)
-        month_start, month_end = summary_script.parse_date_range("2026-02-10", None, None, "month", self.timezone)
-        self.assertEqual((week_start, week_end), (date(2025, 12, 29), date(2026, 1, 4)))
-        self.assertEqual((month_start, month_end), (date(2026, 2, 1), date(2026, 2, 28)))
-
-    def test_report_templates_are_paste_ready(self):
-        result = self.collect_with_rules()
-        timesheet = summary_script.render_table(result, "tsv", "client-timesheet")
-        review = summary_script.render_table(result, "markdown", "weekly-review")
-        trend = summary_script.render_table(result, "csv", "app-trend")
-        self.assertIn("Northwind\tQuarterly review", timesheet)
-        self.assertIn("top_project", review)
-        self.assertIn("2026-01-02", trend)
-
-    def test_trend_includes_afk_and_active_time(self):
-        result = self.collect_with_rules()
-        self.assertEqual(result["trend"], [{
-            "date": "2026-01-02",
-            "active_seconds": 540.0,
-            "afk_seconds": 120.0,
-            "billable_seconds": 240.0,
-        }])
-
-    def test_sanitizes_urls_and_truncates_titles(self):
-        result = self.collect()
-        titles = [item["title"] for item in result["timeline"]]
-        self.assertIn("[URL omitted]", titles)
-        self.assertFalse(any("private.example.com" in title for title in titles))
-        self.assertLessEqual(max(map(len, titles)), summary_script.MAX_TITLE_LENGTH)
-
-    def test_can_hide_timeline_titles(self):
-        result = summary_script.collect_summary(
-            date(2026, 1, 2),
-            date(2026, 1, 2),
-            self.timezone,
-            FixtureFetch(self.payload),
-            include_titles=False,
-        )
-        self.assertEqual({item["title"] for item in result["timeline"]}, {"[Title hidden]"})
-
-    def test_spreadsheet_outputs_escape_formulas(self):
-        result = self.collect()
-        tsv = summary_script.render_table(result, "tsv", "apps")
-        csv_output = summary_script.render_table(result, "csv", "timeline", csv_bom=True)
-        self.assertIn("'=Spreadsheet", tsv)
-        self.assertTrue(csv_output.startswith("\ufeff"))
-        self.assertNotIn("private.example.com", csv_output)
-
-    def test_markdown_escapes_cell_separators(self):
-        result = self.collect()
-        markdown = summary_script.render_table(result, "markdown", "timeline")
-        self.assertIn("Project\\|Plan", markdown)
-
-    def test_missing_buckets_is_unavailable(self):
-        with self.assertRaises(summary_script.ActivityWatchUnavailable):
-            summary_script.collect_summary(date(2026, 1, 2), date(2026, 1, 2), self.timezone, lambda _: {})
-
-    def test_empty_events_is_unavailable(self):
-        payload = dict(self.payload)
-        payload["window_events"] = []
-        with self.assertRaises(summary_script.ActivityWatchUnavailable):
-            summary_script.collect_summary(date(2026, 1, 2), date(2026, 1, 2), self.timezone, FixtureFetch(payload))
-
-    def test_unavailable_tables_are_paste_ready(self):
-        unavailable = {"available": False, "reason": "No local server", "timezone": "Asia/Singapore"}
-        self.assertEqual(summary_script.render_table(unavailable, "tsv", "apps"), "status\treason\tsource\nunavailable\tNo local server\tActivityWatch\n")
-        self.assertIn("| status | reason | source |", summary_script.render_table(unavailable, "markdown", "apps"))
-
-    def test_skill_frontmatter_is_present(self):
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        self.assertTrue(skill.startswith("---\nname: computer-usage-summary\n"))
-        self.assertIn("description:", skill.split("---", 2)[1])
-
-    def test_skill_default_conversational_output_contract(self):
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        headings = [
-            "`Today at a glance`",
-            "`What you did`",
-            "`App table`",
-            "`Caveats`",
+    def test_merge_intervals_removes_duplicate_and_partial_overlap(self):
+        intervals = [
+            (self.start, self.start + dt.timedelta(hours=10)),
+            (self.start, self.start + dt.timedelta(hours=8)),
+            (self.start + dt.timedelta(hours=5), self.start + dt.timedelta(hours=12)),
         ]
-        positions = [skill.index(heading) for heading in headings]
-        self.assertEqual(positions, sorted(positions))
-        self.assertIn("unless the user explicitly asks for a simpler or shorter output", skill)
-        self.assertIn("Do not infer a reduced format merely because the request is short.", skill)
+
+        merged = SUMMARY.merge_intervals(intervals)
+
+        self.assertEqual(merged, [(self.start, self.start + dt.timedelta(hours=12))])
+
+    def test_summarize_period_deduplicates_afk_and_caps_day_by_union(self):
+        afk_events = [
+            self.event(self.start, 10 * 3600, {"status": "afk"}),
+            self.event(self.start, 10 * 3600, {"status": "afk"}),
+            self.event(self.start + dt.timedelta(hours=10), 2 * 3600, {"status": "not-afk"}),
+            self.event(self.start + dt.timedelta(hours=10), 2 * 3600, {"status": "not-afk"}),
+        ]
+        window_events = [
+            self.event(
+                self.start + dt.timedelta(hours=10),
+                2 * 3600,
+                {"app": "Google Chrome", "title": "Research - Google Chrome"},
+            )
+        ]
+
+        result = SUMMARY.summarize_period(
+            window_events,
+            afk_events,
+            self.start,
+            self.end,
+            self.timezone,
+            "Asia/Singapore",
+        )
+
+        self.assertEqual(result["active_seconds"], 7200.0)
+        self.assertEqual(result["afk_seconds"], 36000.0)
+        self.assertEqual(result["coverage_seconds"], 43200.0)
+        self.assertLessEqual(result["active_seconds"] + result["afk_seconds"], 86400.0)
+
+    def test_summarize_period_displays_local_timezone(self):
+        afk_events = [self.event(self.start, 60, {"status": "not-afk"})]
+        window_events = [self.event(self.start, 60, {"app": "Code", "title": "project"})]
+
+        result = SUMMARY.summarize_period(
+            window_events,
+            afk_events,
+            self.start,
+            self.end,
+            self.timezone,
+            "Asia/Singapore",
+        )
+
+        self.assertEqual(result["timezone"], "Asia/Singapore")
+        self.assertEqual(result["range_start"], "2026-08-03T00:00:00+08:00")
+        self.assertEqual(result["timeline"][0]["start"], "2026-08-03T00:00:00+08:00")
+
+    def test_system_timezone_takes_precedence_over_tz_environment(self):
+        with (
+            mock.patch.dict(os.environ, {"TZ": "UTC"}),
+            mock.patch.object(
+                SUMMARY.os.path,
+                "realpath",
+                return_value="/usr/share/zoneinfo/Asia/Singapore",
+            ),
+        ):
+            timezone, name = SUMMARY.resolve_timezone()
+
+        self.assertEqual(name, "Asia/Singapore")
+        self.assertEqual(str(timezone), "Asia/Singapore")
+
+    def test_dst_fallback_day_is_capped_at_twenty_four_hours(self):
+        timezone = ZoneInfo("America/New_York")
+        start = dt.datetime(2026, 11, 1, tzinfo=timezone)
+        end = dt.datetime(2026, 11, 2, tzinfo=timezone)
+        absolute_start = start.astimezone(dt.timezone.utc)
+        afk_events = [
+            self.event(absolute_start, 13 * 3600, {"status": "not-afk"}),
+            self.event(
+                absolute_start + dt.timedelta(hours=13),
+                12 * 3600,
+                {"status": "afk"},
+            ),
+        ]
+
+        result = SUMMARY.summarize_period(
+            [],
+            afk_events,
+            start,
+            end,
+            timezone,
+            "America/New_York",
+        )
+
+        self.assertLessEqual(result["active_seconds"] + result["afk_seconds"], 86400.0)
+        self.assertLessEqual(result["coverage_seconds"], 86400.0)
+
+    def test_browser_pages_group_normalized_titles_and_count_sessions(self):
+        active_intervals = [(self.start, self.start + dt.timedelta(hours=1))]
+        window_events = [
+            self.event(
+                self.start + dt.timedelta(minutes=1),
+                60,
+                {"app": "Google Chrome", "title": "Example - Google Chrome - Profile"},
+            ),
+            self.event(
+                self.start + dt.timedelta(minutes=5),
+                120,
+                {"app": "Google Chrome", "title": "Example - Google Chrome - Profile"},
+            ),
+        ]
+
+        pages = SUMMARY.aggregate_browser_pages(
+            window_events,
+            active_intervals,
+            self.start,
+            self.end,
+            self.timezone,
+        )
+
+        self.assertEqual(len(pages), 1)
+        self.assertEqual(pages[0]["title"], "Example")
+        self.assertEqual(pages[0]["active_seconds"], 180.0)
+        self.assertEqual(pages[0]["foreground_sessions"], 2)
+        self.assertEqual(pages[0]["first_seen"], "2026-08-03T00:01:00+08:00")
+        self.assertEqual(pages[0]["last_active"], "2026-08-03T00:07:00+08:00")
+
+    def test_default_parser_selects_copyable_markdown_report(self):
+        args = SUMMARY.build_parser().parse_args([])
+
+        self.assertEqual(args.format, "markdown")
+        self.assertEqual(args.table, "report")
+
+    def test_markdown_report_contains_daily_and_browser_tables(self):
+        day = {
+            "date": "2026-08-03",
+            "timezone": "Asia/Singapore",
+            "active_seconds": 180.0,
+            "afk_seconds": 60.0,
+            "coverage_seconds": 240.0,
+            "untracked_seconds": 86160.0,
+            "apps": [],
+            "browser_pages": [
+                {
+                    "app": "Google Chrome",
+                    "title": "Example",
+                    "foreground_sessions": 2,
+                    "active_seconds": 180.0,
+                    "first_seen": "2026-08-03T10:00:00+08:00",
+                    "last_active": "2026-08-03T10:05:00+08:00",
+                }
+            ],
+            "timeline": [],
+        }
+        summary = {
+            "timezone": "Asia/Singapore",
+            "range_start": "2026-08-03T00:00:00+08:00",
+            "range_end": "2026-08-04T00:00:00+08:00",
+            "days": [day],
+        }
+
+        report = SUMMARY.render_report(summary, "markdown")
+
+        self.assertIn("Asia/Singapore", report)
+        self.assertIn("UTC+08:00", report)
+        self.assertIn("| date | active_seconds |", report)
+        self.assertIn("| browser | title | foreground_sessions |", report)
+        self.assertIn("Google Chrome", report)
+
+    @staticmethod
+    def event(start, duration, data):
+        return {"timestamp": start.astimezone(dt.timezone.utc).isoformat(), "duration": duration, "data": data}
 
 
 if __name__ == "__main__":

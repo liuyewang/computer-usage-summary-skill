@@ -45,7 +45,19 @@ privacy model.
 
 - Evidence is from the baseline test run on 2026-11-10 in Asia/Singapore.
 - Production code, tests, workflow, and user-facing documentation are updated
-  in the working tree and have not been committed or pushed.
+  and committed in the source repository.
 - The local Codex plugin validator is not installed; manifest JSON and package
   layout were checked manually instead.
-- External publication/synchronization remains intentionally unstarted.
+- Source repository commits `154523a` and `a66278c` are pushed; `origin/main`
+  matches `a66278c` and the worktree is clean.
+- Awesome Codex Plugins PR #693 is open with all checks passing, including the
+  centralized scanner threshold and generated marketplace sync; maintainer
+  merge is still pending.
+- ClawHub version `0.3.0` was submitted under `@liuyewang/computer-usage-summary`,
+  but its owner-visible publication state is `checks_failed` with
+  `clawscan` and `trufflehog` failed and automatic retrying. It is not claimed
+  as publicly released.
+- HOL Registry and SkillsMP are expected to follow the generator-backed Awesome
+  listing after PR #693 merges. skills.sh is source-indexed from GitHub; its
+  authenticated API could not be queried here. LobeHub and Cursor Directory
+  were not resubmitted to avoid duplicate entries.

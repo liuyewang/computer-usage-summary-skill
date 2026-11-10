@@ -4,7 +4,7 @@ This is a privacy-safe product and validation log. It records decisions and
 feedback themes, never ActivityWatch events, window titles, URLs, account
 names, local paths, or behavioral telemetry.
 
-## Unreleased - Modular Reports and Deterministic Activity Summaries
+## 2026-11-10 - v0.3.0 Modular Reports and Deterministic Activity Summaries
 
 - Split the executable into tested, standard-library-only modules for source
   access, interval math, classification, report shaping, rendering, and CLI

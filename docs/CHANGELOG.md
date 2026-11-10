@@ -4,6 +4,20 @@ This is a privacy-safe product and validation log. It records decisions and
 feedback themes, never ActivityWatch events, window titles, URLs, account
 names, local paths, or behavioral telemetry.
 
+## Unreleased - Modular Reports and Deterministic Activity Summaries
+
+- Split the executable into tested, standard-library-only modules for source
+  access, interval math, classification, report shaping, rendering, and CLI
+  orchestration while preserving the original entrypoint and options.
+- Added deterministic activity categories, daily `main_focus`, category tables,
+  and explainable confidence labels for observed foreground evidence.
+- Preserved full multi-day totals, bounded each local day independently, and
+  summarized browser pages below the default two-minute display threshold.
+- Added format-aware unavailable output and finite non-negative validation for
+  browser thresholds.
+- Updated the skill contract and submission examples to match the supported
+  CLI and privacy boundaries.
+
 ## 2026-07-27 - v0.2.3 Standardized Conversational Output
 
 - Standardized conversational summaries around `Today at a glance`, `What you
